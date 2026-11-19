@@ -1,1 +1,61 @@
-<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#111111"><title>Prime POS – Testkasse</title><style>body{font-family:system-ui;background:#111;color:#fff;margin:0;padding:18px}h1{color:#ffca28;margin-bottom:0}small{color:#aaa}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0}button{border:0;border-radius:12px;padding:16px 10px;font-size:16px;font-weight:700;background:#ffc928;color:#111}button:active{opacity:.7}.panel{background:#242424;border-radius:14px;padding:15px;margin-top:16px}.line{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid #444}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}.muted{background:#444;color:white}.danger{background:#b93636;color:white}#status{color:#ffcc44;font-size:13px}</style></head><body><h1>PRIME POS</h1><small>Prime Streetfood Siegen · DEMO / keine Fiskalkasse</small><div class="grid" id="products"></div><div class="panel"><h2>Aktuelle Bestellung</h2><div id="cart">Noch keine Artikel</div><h2 id="total">0,00 €</h2><div class="actions"><button onclick="checkout('Bar')">Bar (Demo)</button><button onclick="checkout('Karte')">Karte (Demo)</button><button class="muted" onclick="clearCart()">Leeren</button></div></div><div class="panel"><h2>Tagesübersicht (Demo)</h2><div id="summary"></div><button class="danger" onclick="resetDay()">Testdaten löschen</button><p id="status">Testversion: keine TSE, keine Belege, keine echte Zahlungsabwicklung. Nicht für reale Verkäufe verwenden.</p></div><script>const items=[['Steak Döner',10.5],['Döner Menü',15],['Steak Döner Bowl',14],['Pommes',4],['Kids Bowl',7],['Chicken Menü',11],['Nuggets',3.5],['Chicken Sticks',3.5],['Getränk',2.5]];const money=n=>n.toLocaleString('de-DE',{style:'currency',currency:'EUR'});let cart=[];let sales=JSON.parse(localStorage.getItem('prime-demo-sales')||'[]');let day=localStorage.getItem('prime-demo-day');let today=new Date().toLocaleDateString('sv-SE');if(day!==today){sales=[];localStorage.setItem('prime-demo-day',today);localStorage.setItem('prime-demo-sales','[]')}document.getElementById('products').innerHTML=items.map((x,i)=>`<button onclick="add(${i})">${x[0]}<br>${money(x[1])}</button>`).join('');function add(i){cart.push(i);render()}function clearCart(){cart=[];render()}function render(){let total=cart.reduce((s,i)=>s+items[i][1],0);document.getElementById('cart').innerHTML=cart.length?cart.map((i,n)=>`<div class="line"><span>${items[i][0]}</span><span>${money(items[i][1])} <button class="muted" style="padding:4px 8px" onclick="cart.splice(${n},1);render()">×</button></span></div>`).join(''):'Noch keine Artikel';document.getElementById('total').textContent=money(total);document.getElementById('summary').textContent=`${sales.length} Testbestellungen · ${money(sales.reduce((s,x)=>s+x.total,0))}`;}function checkout(type){if(!cart.length)return alert('Bitte zuerst Artikel auswählen.');let total=cart.reduce((s,i)=>s+items[i][1],0);if(!confirm(`TESTBUCHUNG ${type}: ${money(total)}? Keine echte Zahlung.`))return;sales.push({total,type,at:new Date().toISOString()});localStorage.setItem('prime-demo-sales',JSON.stringify(sales));cart=[];render()}function resetDay(){if(confirm('Alle lokalen Testbuchungen löschen?')){sales=[];localStorage.setItem('prime-demo-sales','[]');render()}}render();</script></body></html>
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111111">
+<title>Prime POS – Testkasse</title>
+<style>
+*{box-sizing:border-box}body{font-family:system-ui,sans-serif;background:#111;color:#fff;margin:0;padding:18px;max-width:900px;margin-inline:auto}h1{color:#ffca28;margin-bottom:0}small{color:#aaa}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:20px 0}button{border:0;border-radius:12px;padding:16px 10px;font-size:16px;font-weight:700;background:#ffc928;color:#111;cursor:pointer}button:active{opacity:.7}.panel{background:#242424;border-radius:14px;padding:15px;margin-top:16px}.line{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #444}.item-name{font-weight:700}.unit{color:#bbb;font-size:12px;margin-top:4px}.qty{display:flex;align-items:center;gap:8px;margin-top:8px}.qty button{padding:5px 12px;min-width:38px;font-size:20px}.qty-number{min-width:28px;text-align:center;font-weight:700}.price{font-weight:700;white-space:nowrap}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{flex:1}.muted{background:#444;color:white}.danger{background:#b93636;color:white}#status{color:#ffcc44;font-size:13px}
+</style>
+</head>
+<body>
+<h1>PRIME POS</h1>
+<small>Prime Streetfood Siegen · DEMO / keine Fiskalkasse</small>
+<div class="grid" id="products"></div>
+<div class="panel">
+<h2>Aktuelle Bestellung</h2>
+<div id="cart">Noch keine Artikel</div>
+<h2 id="total">0,00 €</h2>
+<div class="actions"><button onclick="checkout('Bar')">Bar (Demo)</button><button onclick="checkout('Karte')">Karte (Demo)</button><button class="muted" onclick="clearCart()">Leeren</button></div>
+</div>
+<div class="panel">
+<h2>Tagesübersicht (Demo)</h2>
+<div id="summary"></div>
+<button class="danger" onclick="resetDay()">Testdaten löschen</button>
+<p id="status">Testversion: keine TSE, keine Belege, keine echte Zahlungsabwicklung. Nicht für reale Verkäufe verwenden.</p>
+</div>
+<script>
+const items=[['Steak Döner',10.5],['Döner Menü',15],['Steak Döner Bowl',14],['Pommes',4],['Kids Bowl',7],['Chicken Menü',11],['Nuggets',3.5],['Chicken Sticks',3.5],['Getränk',2.5]];
+const money=n=>n.toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+let cart={};
+let sales=[];
+try{const stored=JSON.parse(localStorage.getItem('prime-demo-sales')||'[]');sales=Array.isArray(stored)?stored:[]}catch(e){sales=[]}
+const today=new Date().toLocaleDateString('sv-SE');
+try{if(localStorage.getItem('prime-demo-day')!==today){sales=[];localStorage.setItem('prime-demo-day',today);localStorage.setItem('prime-demo-sales','[]')}}catch(e){}
+document.getElementById('products').innerHTML=items.map((x,i)=>`<button onclick="add(${i})">${x[0]}<br>${money(x[1])}</button>`).join('');
+function add(i){cart[i]=(cart[i]||0)+1;render()}
+function changeQty(i,delta){cart[i]=(cart[i]||0)+delta;if(cart[i]<=0)delete cart[i];render()}
+function clearCart(){cart={};render()}
+function totalAmount(){return Object.entries(cart).reduce((sum,[i,qty])=>sum+items[Number(i)][1]*qty,0)}
+function render(){
+ const entries=Object.entries(cart).filter(([,qty])=>qty>0);
+ document.getElementById('cart').innerHTML=entries.length?entries.map(([key,qty])=>{
+ const i=Number(key);return `<div class="line"><div><div class="item-name">${qty} × ${items[i][0]}</div><div class="unit">Einzelpreis ${money(items[i][1])}</div><div class="qty"><button class="muted" aria-label="Ein ${items[i][0]} entfernen" onclick="changeQty(${i},-1)">−</button><span class="qty-number">${qty}</span><button aria-label="Ein ${items[i][0]} hinzufügen" onclick="changeQty(${i},1)">+</button></div></div><div class="price">${money(items[i][1]*qty)}</div></div>`
+ }).join(''):'Noch keine Artikel';
+ document.getElementById('total').textContent=money(totalAmount());
+ document.getElementById('summary').textContent=`${sales.length} Testbestellungen · ${money(sales.reduce((sum,x)=>sum+(Number(x.total)||0),0))}`;
+}
+function checkout(type){
+ if(!Object.keys(cart).length)return alert('Bitte zuerst Artikel auswählen.');
+ const total=totalAmount();
+ if(!confirm(`TESTBUCHUNG ${type}: ${money(total)}? Keine echte Zahlung.`))return;
+ sales.push({total,type,at:new Date().toISOString()});
+ try{localStorage.setItem('prime-demo-sales',JSON.stringify(sales))}catch(e){alert('Testbuchung konnte nicht dauerhaft gespeichert werden.')}
+ cart={};render();
+}
+function resetDay(){if(confirm('Alle lokalen Testbuchungen löschen?')){sales=[];try{localStorage.setItem('prime-demo-sales','[]')}catch(e){}render()}}
+render();
+</script>
+</body>
+</html>
